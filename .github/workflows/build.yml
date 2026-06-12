@@ -1,0 +1,39 @@
+name: Compilation du Launcher (.EXE)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Récupération du code
+      uses: actions/checkout@v4
+
+    - name: Configuration de Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Compilation du JAR avec Gradle
+      run: ./gradlew jar
+
+    - name: Téléchargement de Launch4j
+      run: |
+        Invoke-WebRequest -Uri "https://sourceforge.net/projects/launch4j/files/launch4j-3/3.50/launch4j-3.50-win32.zip/download" -OutFile launch4j.zip
+        Expand-Archive -Path launch4j.zip -DestinationPath launch4j_app
+
+    - name: Conversion du JAR en EXE
+      run: |
+        ./launch4j_app/launch4j/launch4j.exe launch4j.xml
+
+    - name: Sauvegarde du fichier EXE final
+      uses: actions/upload-artifact@v4
+      with:
+        name: Mon-Launcher-Windows
+        path: build/mon-launcher.exe
