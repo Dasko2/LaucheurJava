@@ -20,6 +20,10 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Rendre gradlew exécutable
+      shell: bash
+      run: chmod +x gradlew
+
     - name: Compilation du JAR avec Gradle
       run: ./gradlew jar
 
