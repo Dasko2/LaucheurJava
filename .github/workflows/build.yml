@@ -1,31 +1,42 @@
-plugins {
-    id 'java'
-    id 'application'
-}
+name: Compilation du Launcher (.EXE)
 
-group 'net.monclient'
-version '1.0.0'
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-repositories {
-    mavenCentral()
-}
+jobs:
+  build:
+    runs-on: windows-latest
 
-dependencies {
-    // Utilisation des versions directes hébergées sur Maven Central
-    implementation 'fr.litarvan:openauth:1.1.8'
-    implementation 'net.thetechisalive:openlauncherlib:3.2.3'
-}
+    steps:
+    - name: Récupération du code
+      uses: actions/checkout@v4
 
-application {
-    mainClass = 'net.monclient.launcher.Main'
-}
+    - name: Configuration de Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes 'Main-Class': 'net.monclient.launcher.Main'
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
+    - name: Génération du Wrapper Gradle
+      run: gradle wrapper
+
+    - name: Compilation du JAR avec Gradle
+      run: ./gradlew jar
+
+    - name: Téléchargement de Launch4j
+      run: |
+        Invoke-WebRequest -Uri "https://sourceforge.net/projects/launch4j/files/launch4j-3/3.50/launch4j-3.50-win32.zip/download" -OutFile launch4j.zip
+        Expand-Archive -Path launch4j.zip -DestinationPath launch4j_app
+
+    - name: Conversion du JAR en EXE
+      run: |
+        ./launch4j_app/launch4j/launch4j.exe launch4j.xml
+
+    - name: Sauvegarde du fichier EXE final
+      uses: actions/upload-artifact@v4
+      with:
+        name: Mon-Launcher-Windows
+        path: build/mon-launcher.exe
