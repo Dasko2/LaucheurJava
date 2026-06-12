@@ -8,13 +8,12 @@ version '1.0.0'
 
 repositories {
     mavenCentral()
-    maven { url 'https://libraries.minecraft.net/' }
-    maven { url 'https://m2.flowpowered.com/repository/maven-public/' }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    implementation 'fr.litarvan:openauth:1.1.8'
-    implementation 'net.thetechisalive:openlauncherlib:3.2.3'
+    implementation 'com.github.Litarvan:OpenAuth:1.1.8'
+    implementation 'com.github.thetechisalive:OpenLauncherLib:3.2.3'
 }
 
 application {
